@@ -174,5 +174,38 @@ Mohammed Sadiq Bandiya
 Cybersecurity - Penetration Testing and Ethical Hacking Intern — Batch B082, NetworkWalks Academy  
 LinkedIn: https://www.linkedin.com/in/mohammed-sadiq-bandiya-80117017
 
+## Notes
+
+1. NAT vs NAT Network
+A standard NAT configuration and a NAT Network serve different purposes.
+
+A NAT Network allows multiple VMs connected to the same virtual network to communicate with one another while providing network address translation for external connectivity. This makes it useful for building a multi-machine cybersecurity laboratory.
+
+2. Virtual Machine Networking
+VirtualBox virtual network adapters connect virtual machines to different types of networks and network configuration affects communication between machines.
+
+3. Static IP Configuration
+How to configure and verify IPv4 addressing, subnet masks, gateways, and DNS settings in Kali Linux.
+
+4. VM Snapshots
+Create a clean snapshot before performing risky or experimental activities to provide a known-good recovery point.
+
+5. Documentation
+Document commands, configuration, screenshots, problems, and solutions as part of a professional cybersecurity project.
+
+Security and ethical use
+This laboratory is intended strictly for education purposes only.
+
+Tools and resources
+- 7-Zip: https://7-zip.org/download.html
+- VirtualBox: https://virtualbox.org/wiki/Downloads
+- Kali Linux: https://kali.org/get-kali
+
+Author
+Mohammed Sadiq Bandiya
+Cybersecurity - Penetration Testing and Ethical Hacking Intern — Batch B082, NetworkWalks Academy
+LinkedIn: https://www.linkedin.com/in/mohammed-sadiq-bandiya-80117017
+
 ## License
 This project is available under the MIT License. See LICENSE for details.
+
