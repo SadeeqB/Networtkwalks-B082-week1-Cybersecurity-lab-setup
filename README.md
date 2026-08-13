@@ -33,7 +33,7 @@ This project sets up an isolated lab network (NAT Network) where multiple VMs ca
 
 Recommended: Create a snapshot/backup before making changes.
 
-## Lab architecture (example)
+## Lab Architecture (example)
 - Virtual network: NAT Network
 - Network range: 10.0.0.0/24
 - Kali VM IP: 10.0.0.2/24
