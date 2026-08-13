@@ -41,8 +41,8 @@ Recommended: Create a snapshot/backup before making changes.
 - DNS: 8.8.8.8
 - Future VMs: 10.0.0.3–10.0.0.99
 
-![Lab diagram](https://github.com/user-attachments/assets/41db100e-bcf5-489d-b4f2-844fa477e2cd)  
-(Provide a small diagram or link to a larger image; include alt text.)
+![Lab diagram](assets/diagram.svg)  
+(SVG diagram included in /assets)
 
 ## Setup Steps
 
