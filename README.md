@@ -192,7 +192,7 @@ This provides a known-good recovery point for future cybersecurity exercises.
 5. Documentation
 I learned that documenting commands, configuration, screenshots, problems, and solutions is an important part of a professional cybersecurity project.
 
-🔐 SWCURITY AND ETHICAL USE:
+🔐 SECURITY AND ETHICAL USE:
 
 This laboratory is intended strictly for education purposes only.
 
