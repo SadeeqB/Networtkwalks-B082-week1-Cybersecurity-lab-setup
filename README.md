@@ -1,220 +1,178 @@
-# Cybersecurity Lab Setup using Virtual box and Kali Linux OS #
+# Cybersecurity Lab Setup (VirtualBox + Kali Linux)
 
-📌 PROJECT OVERVIEW:
+A reproducible guide to creating a small, private penetration-testing lab on a Windows host using VirtualBox and Kali Linux. This README documents the environment, step-by-step setup, verification commands, troubleshooting tips, and ethical guidance.
 
-This project focuses on setting up a virtual cybersecurity and penetration-testing laboratory using VirtualBox and Kali Linux.
-The purpose of the lab is to create a controlled environment where cybersecurity tools, network scanning, reconnaissance, vulnerability assessment, and other security-testing activities can be performed safely and repeatedly.
-The lab is configured on a private virtual network so that additional machines can be added later and used as targets for authorized security testing.
+## Table of Contents
+- [Project Overview](#project-overview)
+- [Prerequisites](#prerequisites)
+- [Lab Architecture](#lab-architecture)
+- [Setup Steps](#setup-steps)
+  - [Install 7-Zip](#install-7-zip)
+  - [Install VirtualBox](#install-virtualbox)
+  - [Create NAT Network (VirtualBox)](#create-nat-network-virtualbox)
+  - [Import Kali Linux VM](#import-kali-linux-vm)
+  - [Configure Kali Network (static IP)](#configure-kali-network-static-ip)
+  - [Create Clean Snapshot](#create-clean-snapshot)
+- [Verification](#verification)
+- [Troubleshooting](#troubleshooting)
+- [What I learned](#what-i-learned)
+- [Security & Ethical Use](#security--ethical-use)
+- [Tools & Resources](#tools--resources)
+- [Author & License](#author--license)
 
-🎯 THE MAIN OBJECTIVES OF THIS PROJECT ARE TO:
+## Project Overview
+This project sets up an isolated lab network (NAT Network) where multiple VMs can communicate internally while still having controlled outbound internet access. It is intended only for learning and authorized testing.
 
-Install and configure VirtualBox.
-Install/import Kali Linux as a virtual machine.
-Create a private NAT Network for the cybersecurity lab.
-Configure network connectivity for Kali Linux.
-Assign a consistent IP address to the Kali VM.
-Verify network connectivity and DNS resolution.
-Take a clean VM snapshot for recovery.
-Document the complete setup process.
-Prepare the environment for future cybersecurity projects.
+## Prerequisites
+- Host OS: Windows 10 (or newer)
+- CPU: Intel Core i5 or equivalent with virtualization (VT-x/AMD-V) enabled in BIOS
+- RAM: 8 GB (host); allocate at least 2 GB to Kali
+- VirtualBox: 7.x
+- 7-Zip (if distributed images are archived)
+- Kali Linux OVA or VM image (download from official site)
 
-🛡️ THE PURPOSE OF THIS LAB:
+Recommended: Create a snapshot/backup before making changes.
 
-The Lab provides an isolated and controlled environment for Cybersecurity learning and authorized security testing.
-It can be used for activities such as:
-  Network Reconnaissance
-  Port Scanning
-  Vulnerability Assessment
-  Packet Analysis
-  Exploitation Practice
-  Security-tool Experimentation
+## Lab architecture (example)
+- Virtual network: NAT Network
+- Network range: 10.0.0.0/24
+- Kali VM IP: 10.0.0.2/24
+- Gateway: 10.0.0.1
+- DNS: 8.8.8.8
+- Future VMs: 10.0.0.3–10.0.0.99
 
-Important: This laboratory must only be used for systems that you own or have explicit permission to test. Do not use the lab or its tools to attack unauthorized systems.
+![Lab diagram](https://github.com/user-attachments/assets/41db100e-bcf5-489d-b4f2-844fa477e2cd)  
+(Provide a small diagram or link to a larger image; include alt text.)
 
-🏗️ LAB ARCHITECTURE:
+## Setup Steps
 
-<img width="2600" height="1186" alt="image" src="https://github.com/user-attachments/assets/41db100e-bcf5-489d-b4f2-844fa477e2cd" />
+### Install 7-Zip
+Download and install 7-Zip if your Kali VM image is compressed:
+https://7-zip.org/download.html
 
+### Install VirtualBox
+Download and install VirtualBox:
+https://www.virtualbox.org/wiki/Downloads
 
-⚙️ LAB CONFIGURATION:
+Enable hardware virtualization (VT-x/AMD-V) in BIOS if VMs fail to start.
 
-🧩 Component	⚙️ Configuration
+### Create NAT Network (VirtualBox)
+You can create a NAT Network from the VirtualBox GUI or using VBoxManage.
 
-🖥️ Host OS	Windows 10
+Example (VBoxManage):
 
-🧠 Host RAM	8 GB
+```bash
+# Create NAT network named "NATNetwork" with DHCP enabled
+VBoxManage natnetwork add --netname "NATNetwork" --network "10.0.0.0/24" --dhcp on
+VBoxManage natnetwork start --netname "NATNetwork"
+```
 
-⚡ Processor	Intel Core i5
+GUI steps:
+- File → Host Network Manager → Create (or: File → Preferences → Network → NAT Networks).
 
-🧰 Hypervisor	VirtualBox 7.0.20
+Why NAT Network: lets multiple VMs on same virtual net communicate with each other while allowing outbound connectivity.
 
-🐉 Security OS	Kali Linux 2026.2
+### Import Kali Linux VM
+Download the official Kali OVA and import it:
+GUI: File → Import Appliance → select .ova
 
-🧠 Kali RAM	2048 MB
+Or command line:
 
-🌐 Virtual Network	NAT Network
+```bash
+VBoxManage import kali-linux.ova --vsys 0 --vmname "Kali"
+```
 
-📡 Network Address	10.0.0.0/24
+Configure VM resources:
+- RAM: 2048 MB
+- Adapter 1 → Attached to: NAT Network → Network: NATNetwork
+- Adapter Type: Intel PRO/1000 MT Desktop (or 82540EM)
 
-🐧 Kali IP Address	10.0.0.2/24
+Create a shared folder if you want file transfer between host and VM (configure in VM Settings → Shared Folders).
 
-🚪 Default Gateway	10.0.0.1
+### Configure Kali Network (static IP)
+You can set a static IPv4 address with NetworkManager (nmcli). Replace connection name if different.
 
-🌍 DNS Server	8.8.8.8
+Find connection name:
 
-🔮 Future VM Range	10.0.0.3–10.0.0.99
+```bash
+nmcli connection show
+```
 
+Set a static IP (example):
 
+```bash
+# Replace 'Wired connection 1' with your connection name
+sudo nmcli connection modify "Wired connection 1" ipv4.addresses 10.0.0.2/24 ipv4.gateway 10.0.0.1 ipv4.dns "8.8.8.8" ipv4.method manual
+sudo nmcli connection up "Wired connection 1"
+```
 
+If you prefer editing files, use the NetworkManager or /etc/network/interfaces mechanisms, but nmcli is reproducible and scriptable.
 
-🪜 LAB SETUP PROCEDURE:
+### Create Clean Snapshot
+After configuring the VM and verifying network, create a snapshot:
 
-Step 1. Install 7-Zip
-7-Zip was installed to extract the Kali Linux virtual-machine package, which may be distributed as a .7z archive.
+```bash
+# GUI: Machine → Take Snapshot
+# CLI:
+VBoxManage snapshot "Kali" take "Clean Kali - Network Setup" --description "Baseline after network config"
+```
 
-Tool: 7-Zip
+## Verification
+In Kali, confirm network settings:
 
-Step 2. Install VirtualBox
-VirtualBox was installed as the hypervisor.
+```bash
+ip addr show
+ip route
+nmcli device show
+ping -c 3 8.8.8.8
+ping -c 3 github.com
+```
+Expected: correct IP (10.0.0.2), reachable gateway and DNS resolution.
 
-Step 3. Create the NAT Network
-A dedicated NAT Network was created in VirtualBox.
+## Troubleshooting
 
-Configuration: Network Name: NATNetwork IPv4 Prefix: 10.0.0.0/24 DHCP: Enabled IPv6: Disabled
+Problem: No internet after static IP
+- Try disabling DAD (Duplicate Address Detection) if NetworkManager stalls:
 
-<img width="2874" height="1702" alt="image" src="https://github.com/user-attachments/assets/78f2c769-855d-4c9f-baa0-84efe7a2b6cb" />
-
-A NAT Network was selected because multiple virtual machines connected to the same NAT Network can communicate with one another while also having outbound network connectivity.
-
-This will allow future attacker and target VMs to communicate within the lab.
-
-Step 4: Import Kali Linux
-The Kali Linux virtual machine was downloaded from the official Kali Linux website and imported into VirtualBox.
-
-The VM network adapter was configured as follows:
-
-Adapter 1
-Attached to: NAT Network
-Network:     NatNetwork
-Adapter Type: Intel PRO/1000 MT Desktop
-The VM was allocated:
-
-RAM: 2048 MB
-
-<img width="1998" height="1166" alt="My Kali Linux Screenshot" src="https://github.com/user-attachments/assets/1cca4008-372c-4801-861b-8783cd92be18" />
-
-A shared folder was also configured for transferring required files between the host operating system and the Kali VM.
-
-Step 5: Configure the Kali Linux Network
-The Kali Linux network configuration was checked and configured with a consistent IPv4 address.
-Example configuration:
-IP Address: 10.0.0.2
-Subnet Mask: 255.255.255.0
-Gateway: 10.0.0.1
-DNS: 8.8.8.8
-A consistent IP address makes it easier to document the lab and reference the Kali machine in future exercises.
-
-<img width="1998" height="1166" alt="image" src="https://github.com/user-attachments/assets/766b7b3b-3377-4900-9e4a-0ead5b572268" />
-
-Step 6: Create a Clean VM Snapshot
-After completing the initial configuration, a VirtualBox snapshot was created.
-
-Example snapshot name:
-
-Clean Kali - Network Setup
-The snapshot represents the clean baseline of the laboratory.
-
-If a future exercise changes or damages the VM configuration, the machine can be restored to this baseline.
-
-
-Example Results:
-
-IP Address:
-10.0.0.2/24
-
-Gateway:
-10.0.0.1
-
-DNS:
-8.8.8.8
-
-🐞 PROBLEMS ENCOUNTERED & SOLUTIONS:
-
-Documenting problems is an important part of the project.
-
-Problem 1. Internet Connectivity After Static IP Configuration
-After manually configuring the IPv4 settings, Internet connectivity may fail depending on the Kali/NetworkManager configuration.
-
-One workaround used during this lab was:
-
+```bash
+# Replace connection name accordingly
 sudo nmcli connection modify "Wired connection 1" ipv4.dad-timeout 0
-The network connection was then restarted/rebooted and connectivity was tested again.
+sudo nmcli connection up "Wired connection 1"
+```
+- Restart NetworkManager:
 
-Important: Network interface and connection names may differ between systems. Students should first identify their actual connection name before running an nmcli command.
+```bash
+sudo systemctl restart NetworkManager
+```
+- Check ip and route tables:
 
-Problem 2. VirtualBox VT-x / Virtualization Error
-The VM initially failed to start because hardware virtualization was disabled in the system firmware/BIOS.
+```bash
+ip addr; ip route
+```
 
-The issue was resolved by:
+Problem: VM won't start (VT-x virtualization error)
+- Reboot host and enable VT-x / AMD-V in BIOS/UEFI.
+- Confirm with host tools (Task Manager > Performance tab on Windows shows Virtualization status).
 
-Restarting the computer.
-Entering BIOS/UEFI settings.
-Enabling Intel VT-x / hardware virtualization.
-Saving the configuration.
-Restarting the computer.
-Starting the Kali VM again.
-After enabling virtualization, the VM started successfully.
+## What I learned
+- Difference between NAT and NAT Network.
+- How VirtualBox networking types affect VM-to-VM communication.
+- How to configure a static IP on Kali using nmcli.
+- Benefits of creating VM snapshots before experiments.
+- Importance of documenting commands and troubleshooting steps.
 
-💡 WHAT I LEARNED:
+## Security & Ethical Use
+This lab is for learning and authorized testing only. Do not scan, attack, or access systems you do not own or for which you do not have explicit permission. See: https://www.kali.org/docs/ethical-hacking/
 
-Through this project, I learned how to create and configure a virtual environment for cybersecurity practice.
+## Tools & Resources
+- VirtualBox: https://www.virtualbox.org/wiki/Downloads
+- Kali Linux: https://www.kali.org/get-kali
+- 7-Zip: https://7-zip.org/download.html
 
-The most important concepts I learned include:
+## Author
+Mohammed Sadiq Bandiya  
+Cybersecurity - Penetration Testing and Ethical Hacking Intern — Batch B082, NetworkWalks Academy  
+LinkedIn: https://www.linkedin.com/in/mohammed-sadiq-bandiya-80117017
 
-1. NAT vs NAT Network
-A standard NAT configuration and a NAT Network serve different purposes.
-
-A NAT Network allows multiple VMs connected to the same virtual network to communicate with one another while providing network address translation for external connectivity.
-
-This makes it useful for building a multi-machine cybersecurity laboratory.
-
-2. Virtual Machine Networking
-I learned how VirtualBox virtual network adapters connect virtual machines to different types of networks and how network configuration affects communication between machines.
-
-3. Static IP Configuration
-I learned how to configure and verify IPv4 addressing, subnet masks, gateways, and DNS settings in Kali Linux.
-
-4. VM Snapshots
-I learned that a clean snapshot should be created before performing risky or experimental activities.
-
-This provides a known-good recovery point for future cybersecurity exercises.
-
-5. Documentation
-I learned that documenting commands, configuration, screenshots, problems, and solutions is an important part of a professional cybersecurity project.
-
-🔐 SWCURITY AND ETHICAL USE:
-
-This laboratory is intended strictly for education purposes only.
-
-🔗 TOOLS AND RESOURCES:
-
-7-Zip: https://7-zip.org/download.html
-
-VirtualBox: https://virtualbox.org/wiki/Downloads
-
-Kali Linux: https://kali.org/get-kali
-
-👤 AUTHOR:
-
-Mohammed Sadiq Bandiya
-Cybersecurity- Penetration Testing and Ethical Hacking Intern — Batch B082 - NetworkWalks Academy
-LinkedIn: https://www.linkedin.com/in/mohammed-sadiq-bandiya-80117017?utm_source=share_via&utm_content=profile&utm_medium=member_android
-
-
-📌 PROJECT INFORMATION:
-
-Internship: Cybersecurity - Penetration Testing and Ethical Hacking Internship
-Week: 01
-Project: Cybersecurity & Pentesting Lab Setup
-Organization: NetworkWalks Academy
-Repository: GitHub
+## License
+This project is available under the MIT License. See LICENSE for details.
